@@ -11,6 +11,9 @@ dependencies = [
     "pydantic>=2.0",
 ]
 
+[tool.setuptools.packages.find]
+include = ["ce3*"]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
