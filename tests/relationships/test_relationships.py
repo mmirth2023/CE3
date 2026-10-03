@@ -299,3 +299,203 @@ def test_relationship_store_raises_for_unknown_id():
 
     with pytest.raises(KeyError):
         store.get("UNKNOWN")
+
+def test_relationship_store_finds_relationships_valid_at_timestamp():
+    store = RelationshipStore()
+
+    active = Relationship(
+        id="REL-006",
+        relationship_type=RelationshipType.OPERATES,
+        source_entity_id="COMP-001",
+        target_entity_id="FAC-001",
+        valid_from=datetime(
+            2020,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        ),
+        valid_to=datetime(
+            2025,
+            12,
+            31,
+            tzinfo=timezone.utc,
+        ),
+        confidence=0.9,
+    )
+
+    inactive = Relationship(
+        id="REL-007",
+        relationship_type=RelationshipType.OWNS,
+        source_entity_id="COMP-001",
+        target_entity_id="FAC-002",
+        valid_from=datetime(
+            2010,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        ),
+        valid_to=datetime(
+            2015,
+            12,
+            31,
+            tzinfo=timezone.utc,
+        ),
+        confidence=0.9,
+    )
+
+    store.add(active)
+    store.add(inactive)
+
+    result = store.valid_at(
+        datetime(
+            2023,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        )
+    )
+
+    assert result == [active]
+
+
+def test_relationship_store_includes_open_ended_relationship():
+    store = RelationshipStore()
+
+    relationship = Relationship(
+        id="REL-008",
+        relationship_type=RelationshipType.CONTROLS,
+        source_entity_id="COMP-001",
+        target_entity_id="FAC-001",
+        valid_from=datetime(
+            2020,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        ),
+        confidence=0.9,
+    )
+
+    store.add(relationship)
+
+    result = store.valid_at(
+        datetime(
+            2035,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        )
+    )
+
+    assert result == [relationship]
+
+
+def test_relationship_store_excludes_relationship_before_valid_from():
+    store = RelationshipStore()
+
+    relationship = Relationship(
+        id="REL-009",
+        relationship_type=RelationshipType.OPERATES,
+        source_entity_id="COMP-001",
+        target_entity_id="FAC-001",
+        valid_from=datetime(
+            2025,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        ),
+        confidence=0.9,
+    )
+
+    store.add(relationship)
+
+    result = store.valid_at(
+        datetime(
+            2024,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        )
+    )
+
+    assert result == []
+
+
+def test_relationship_store_excludes_relationship_after_valid_to():
+    store = RelationshipStore()
+
+    relationship = Relationship(
+        id="REL-010",
+        relationship_type=RelationshipType.OPERATES,
+        source_entity_id="COMP-001",
+        target_entity_id="FAC-001",
+        valid_from=datetime(
+            2020,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        ),
+        valid_to=datetime(
+            2025,
+            12,
+            31,
+            tzinfo=timezone.utc,
+        ),
+        confidence=0.9,
+    )
+
+    store.add(relationship)
+
+    result = store.valid_at(
+        datetime(
+            2026,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        )
+    )
+
+    assert result == []
+
+
+def test_relationship_store_treats_validity_boundaries_as_inclusive():
+    store = RelationshipStore()
+
+    relationship = Relationship(
+        id="REL-011",
+        relationship_type=RelationshipType.OPERATES,
+        source_entity_id="COMP-001",
+        target_entity_id="FAC-001",
+        valid_from=datetime(
+            2020,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        ),
+        valid_to=datetime(
+            2025,
+            12,
+            31,
+            tzinfo=timezone.utc,
+        ),
+        confidence=0.9,
+    )
+
+    store.add(relationship)
+
+    assert store.valid_at(
+        datetime(
+            2020,
+            1,
+            1,
+            tzinfo=timezone.utc,
+        )
+    ) == [relationship]
+
+    assert store.valid_at(
+        datetime(
+            2025,
+            12,
+            31,
+            tzinfo=timezone.utc,
+        )
+    ) == [relationship]

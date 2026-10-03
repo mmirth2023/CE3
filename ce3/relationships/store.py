@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from .models import Relationship, RelationshipType
 
 
@@ -10,6 +12,10 @@ class RelationshipStore:
     Relationships are stored independently from entities.
     Entity IDs referenced by relationships are resolved
     against the entity registry at a higher layer.
+
+    Relationships may also carry temporal validity, allowing
+    the store to reconstruct which structural connections
+    existed at a given point in time.
     """
 
     def __init__(self) -> None:
@@ -96,6 +102,44 @@ class RelationshipStore:
                 == source_entity_id
                 and relationship.target_entity_id
                 == target_entity_id
+            )
+        ]
+
+    def valid_at(
+        self,
+        timestamp: datetime,
+    ) -> list[Relationship]:
+        """
+        Return relationships that were valid at the
+        specified point in time.
+
+        A relationship is valid at timestamp T when:
+
+            valid_from <= T
+
+        and:
+
+            valid_to is None
+            or
+            T <= valid_to
+
+        Relationships without a valid_from timestamp are
+        treated as having no known lower temporal boundary.
+        """
+
+        return [
+            relationship
+            for relationship in self._relationships.values()
+            if (
+                (
+                    relationship.valid_from is None
+                    or relationship.valid_from <= timestamp
+                )
+                and
+                (
+                    relationship.valid_to is None
+                    or timestamp <= relationship.valid_to
+                )
             )
         ]
 
