@@ -4,6 +4,15 @@ from .models import (
     StateSpaceDimension,
     StateSpacePosition,
 )
+from .sequence import (
+    StateSpaceTransitionSequence,
+)
+from .sequence_engine import (
+    StateSpaceSequenceEngine,
+)
+from .sequence_history import (
+    StateSpaceTransitionSequenceHistory,
+)
 from .transition import (
     StateSpaceTransition,
     StateSpaceTransitionType,
@@ -20,8 +29,11 @@ __all__ = [
     "StateSpaceDimension",
     "StateSpaceEngine",
     "StateSpacePosition",
+    "StateSpaceSequenceEngine",
     "StateSpaceTransition",
     "StateSpaceTransitionEngine",
     "StateSpaceTransitionHistory",
+    "StateSpaceTransitionSequence",
+    "StateSpaceTransitionSequenceHistory",
     "StateSpaceTransitionType",
 ]
