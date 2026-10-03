@@ -37,6 +37,10 @@ class StateSpaceTransitionSequence(BaseModel):
         default_factory=list
     )
 
+    transition_dimensions: list[list[str]] = Field(
+        default_factory=list
+    )
+
     changed_dimensions: list[str] = Field(
         default_factory=list
     )

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Any
 
 from .sequence import StateSpaceTransitionSequence
@@ -56,6 +55,11 @@ class StateSpaceSequenceEngine:
             for transition in ordered
         ]
 
+        transition_dimensions = [
+            list(transition.changed_dimensions)
+            for transition in ordered
+        ]
+
         changed_dimensions = sorted(
             {
                 dimension
@@ -94,6 +98,7 @@ class StateSpaceSequenceEngine:
             end_time=ordered[-1].assessed_at,
             transition_ids=transition_ids,
             transition_types=transition_types,
+            transition_dimensions=transition_dimensions,
             changed_dimensions=changed_dimensions,
             start_position_id=(
                 ordered[0].previous_position_id

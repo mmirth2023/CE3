@@ -656,3 +656,55 @@ def test_sequence_rejects_empty_transition_list():
             sequence_id="SEQUENCE-015",
             transitions=[],
         )
+
+def test_sequence_preserves_per_transition_dimensions():
+    transition_a = make_transition(
+        "TRANSITION-001",
+        assessed_at=TIME_B,
+        previous_position_id="POSITION-001",
+        current_position_id="POSITION-002",
+        previous_state_time=TIME_A,
+        current_state_time=TIME_B,
+        transition_type=StateSpaceTransitionType.DETERIORATION,
+        changed_dimensions=[
+            "stability",
+            "capacity",
+        ],
+        magnitude=0.4,
+        confidence=0.9,
+    )
+
+    transition_b = make_transition(
+        "TRANSITION-002",
+        assessed_at=TIME_C,
+        previous_position_id="POSITION-002",
+        current_position_id="POSITION-003",
+        previous_state_time=TIME_B,
+        current_state_time=TIME_C,
+        transition_type=StateSpaceTransitionType.RECOVERY,
+        changed_dimensions=[
+            "stability",
+        ],
+        magnitude=0.3,
+        confidence=0.8,
+    )
+
+    engine = StateSpaceSequenceEngine()
+
+    sequence = engine.build(
+        sequence_id="SEQUENCE-016",
+        transitions=[
+            transition_a,
+            transition_b,
+        ],
+    )
+
+    assert sequence.transition_dimensions == [
+        [
+            "stability",
+            "capacity",
+        ],
+        [
+            "stability",
+        ],
+    ]

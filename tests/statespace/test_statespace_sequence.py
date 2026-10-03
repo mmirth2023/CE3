@@ -90,6 +90,34 @@ def test_transition_type_names_returns_values():
     ]
 
 
+def test_sequence_stores_transition_dimensions():
+    sequence = StateSpaceTransitionSequence(
+        id="SEQUENCE-001",
+        start_time=START,
+        end_time=END,
+        transition_dimensions=[
+            [
+                "stability",
+                "capacity",
+            ],
+            [
+                "stability",
+            ],
+        ],
+        transition_count=2,
+    )
+
+    assert sequence.transition_dimensions == [
+        [
+            "stability",
+            "capacity",
+        ],
+        [
+            "stability",
+        ],
+    ]
+
+
 def test_sequence_stores_changed_dimensions():
     sequence = StateSpaceTransitionSequence(
         id="SEQUENCE-001",
